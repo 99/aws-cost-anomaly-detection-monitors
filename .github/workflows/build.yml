@@ -34,16 +34,17 @@ jobs:
           commit_message: 'Automatically format Rust code'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: '41898282+github-actions[bot]@users.noreply.github.com'
-          branch: ${{ github.ref }}  # Ensures it pushes to the current branch
+          branch: ${{ github.ref }}  
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{ secrets.TOKEN }}
-          commit_message: 'Fix Rust formatting'
-          title: 'Fix Rust formatting'
-          body: 'This is an auto-generated PR with Rust formatting fixes.'
-          branch: 'format-fix'
-          delete_branch_after_merge: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            commit-message: 'Fix Rust formatting'
+            title: 'Fix Rust formatting'
+            body: 'This is an auto-generated PR with Rust formatting fixes.'
+            branch: 'format-fix'
+            delete-branch: true
+            base: ${{ github.ref }}
 
   build-and-test:
     name: Build and Test
