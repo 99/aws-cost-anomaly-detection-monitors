@@ -35,6 +35,16 @@ jobs:
           commit_user_name: 'github-actions[bot]'
           commit_user_email: '41898282+github-actions[bot]@users.noreply.github.com'
           branch: format-fix  
+      - name: Check and Fix Formatting
+        run: |
+            rustfmt --edition 2021 --check $(find . -name '*.rs' -print) || true
+            rustfmt --edition 2021 $(find . -name '*.rs' -print)
+      - name: Commit and Push Changes
+        run: |
+            git add -A
+            git commit -m "Automatically format Rust code"
+            git push --set-upstream origin format-fix
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
