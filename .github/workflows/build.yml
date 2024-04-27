@@ -10,7 +10,7 @@ on:
 
 jobs:
   rustfmt:
-    name: Check Rust Formatting
+    name: Check and Fix Rust Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +22,21 @@ jobs:
           components: rustfmt
           override: true
       - name: Check Formatting
-        run: |
-          rustfmt --edition 2021 --check $(find . -name '*.rs' -print)
+        run: rustfmt --edition 2021 --check $(find . -name '*.rs' -print) || true
+      - name: Fix Formatting
+        run: rustfmt --edition 2021 $(find . -name '*.rs' -print)
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Automatically format Rust code'
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit_message: 'Fix Rust format'
+          title: 'Fix Rust format'
+          body: 'This is an auto-generated PR with Rust format fixes.'
+          branch: 'format-fix'
+          delete_branch_after_merge: true
 
   build-and-test:
     name: Build and Test
