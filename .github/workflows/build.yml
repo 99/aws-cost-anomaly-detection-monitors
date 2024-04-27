@@ -18,12 +18,12 @@ jobs:
           fetch-depth: 0  
           token: ${{ secrets.TOKEN }}  
       - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1.0.7
-        with:
-          profile: minimal
-          toolchain: nightly
-          components: rustfmt
-          override: true
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare Branch for Changes
+        run: |
+          git fetch origin main:temp-main --force
+          git checkout -B format-fix temp-main
       - name: Check Formatting
         run: rustfmt --edition 2021 --check $(find . -name '*.rs' -print) || true
       - name: Fix Formatting
@@ -34,17 +34,17 @@ jobs:
           commit_message: 'Automatically format Rust code'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: '41898282+github-actions[bot]@users.noreply.github.com'
-          branch: ${{ github.ref }}  
+          branch: format-fix  
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            commit-message: 'Fix Rust formatting'
-            title: 'Fix Rust formatting'
-            body: 'This is an auto-generated PR with Rust formatting fixes.'
-            branch: 'format-fix'
-            delete-branch: true
-            base: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Fix Rust formatting'
+          title: 'Fix Rust formatting'
+          body: 'This is an auto-generated PR with Rust formatting fixes.'
+          branch: 'format-fix'
+          delete-branch: true
+          base: main
 
   build-and-test:
     name: Build and Test
@@ -53,11 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust Toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+        uses: dtolnay/rust-toolchain@stable
+   
       - name: Build
         run: cargo build --verbose
       - name: Run tests
