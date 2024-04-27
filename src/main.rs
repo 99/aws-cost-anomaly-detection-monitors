@@ -1,12 +1,11 @@
-use rusoto_core::{Region, RusotoError, HttpClient};
-use rusoto_core::credential::{ChainProvider, ProvideAwsCredentials};
 use rusoto_ce::{CostExplorer, CostExplorerClient, GetAnomalyMonitorsRequest};
+use rusoto_core::credential::{ChainProvider, ProvideAwsCredentials};
+use rusoto_core::{HttpClient, Region, RusotoError};
 // use rusoto_credential::StaticProvider;
 use serde::Deserialize;
 use serde_yaml;
 use std::fs;
 use tokio;
-
 
 mod monitor;
 
@@ -26,10 +25,16 @@ impl From<rusoto_ce::AnomalyMonitor> for AnomalyMonitor {
     }
 }
 
-async fn check_anomaly_monitors(client: &CostExplorerClient) -> Result<Vec<AnomalyMonitor>, RusotoError<rusoto_ce::GetAnomalyMonitorsError>> {
+async fn check_anomaly_monitors(
+    client: &CostExplorerClient,
+) -> Result<Vec<AnomalyMonitor>, RusotoError<rusoto_ce::GetAnomalyMonitorsError>> {
     let request = GetAnomalyMonitorsRequest::default();
     let response = client.get_anomaly_monitors(request).await?;
-    Ok(response.anomaly_monitors.into_iter().map(AnomalyMonitor::from).collect())
+    Ok(response
+        .anomaly_monitors
+        .into_iter()
+        .map(AnomalyMonitor::from)
+        .collect())
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,7 +71,11 @@ async fn main() {
         }
     }
 
-    let client = CostExplorerClient::new_with(HttpClient::new().expect("Failed to create HTTP client"), provider, Region::default());
+    let client = CostExplorerClient::new_with(
+        HttpClient::new().expect("Failed to create HTTP client"),
+        provider,
+        Region::default(),
+    );
 
     if let Err(e) = monitor::create_anomaly_monitor_from_config(&client, &config).await {
         eprintln!("Error creating anomaly monitor: {:?}", e);
@@ -77,7 +86,7 @@ async fn main() {
             for monitor in anomaly_monitors {
                 println!("Anomaly Monitor: {:?}", monitor);
             }
-        },
+        }
         Err(err) => eprintln!("Error checking anomaly monitors: {:?}", err),
     }
 }
@@ -86,7 +95,6 @@ async fn main() {
 //     let credentials = StaticProvider::new_minimal("fakeAccessKeyId".to_string(), "fakeSecretAccessKey".to_string());
 //     CostExplorerClient::new_with(HttpClient::new().expect("Failed to create HTTP client"), credentials, Region::UsEast1)
 // }
-
 
 // #[tokio::test]
 // async fn test_anomaly_monitor_creation() {
