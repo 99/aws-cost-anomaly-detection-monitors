@@ -1,0 +1,5 @@
+# my nomaly_monitor_config.yaml
+monitor_name: "Linked account"
+monitor_type: "CUSTOM"
+region: "us-east-1"
+anomaly_threshold: 5.0
